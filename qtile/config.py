@@ -1,6 +1,6 @@
 from libqtile import qtile
 from libqtile import bar, layout, widget, extension, hook
-from libqtile.config import Click, Drag, Group, Key, Match, Screen
+from libqtile.config import Click, Drag, Group, Key, Match, Screen, ScratchPad, DropDown
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
 from libqtile.widget import base
@@ -44,7 +44,7 @@ keys = [
     Key([mod, "control"], "j", lazy.layout.grow_down(), desc="Grow window down"),
     Key([mod, "control"], "k", lazy.layout.grow_up(), desc="Grow window up"),
     Key([mod], "n", lazy.layout.normalize(), desc="Reset all window sizes"), 
-    ### for multi-monitor setup
+    ### for a multi-monitor setup
     Key([mod], "period", lazy.next_screen(), desc='Move focus to next monitor'),
     Key([mod], "comma", lazy.prev_screen(), desc='Move focus to prev monitor'),
     # Toggle between different layouts as defined below
@@ -67,9 +67,9 @@ keys = [
     Key([mod, "shift"], "u", lazy.spawn('escrotum --select ~/Downloads/screenshot.png'), desc="screenshot to ~/Downloads"),
     # spawn shortcuts 
     Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
-    Key([mod], "Return", lazy.spawn(terminal), desc="Launch terminal"),
+    Key([mod, "shift"], "Return", lazy.spawn(terminal), desc="Launch terminal"),
+    Key([mod], "Return", lazy.group['scratchpad'].dropdown_toggle('term'), desc="Scrachpad terminal"),
     Key([mod], "b", lazy.spawn(browser), desc="Launch browser"),
-    Key([mod, "shift"], "b", lazy.spawn("icecat"), desc="Run the based browser"),
     Key([mod], "e", lazy.spawn("emacsclient -c -a 'emacs'"), desc="Launch emacs"),
 ]
 
@@ -94,6 +94,11 @@ for i in groups:
             ),
         ]
     )
+
+# scrachpad functionality
+groups.append(ScratchPad('scratchpad', [
+    DropDown('term', terminal, width=0.4, height=0.5, x=0.3, y=0.2, opacity=1.0),
+]))
 
 # layouts
 layout_theme = {"border_width": 2,
@@ -120,33 +125,33 @@ def init_widgets_list0():
     widgets_list = [
                 # left side
                 widget.CurrentLayout(),
-                widget.GroupBox(),
+                widget.GroupBox(
+                    highlight_method='line',
+                    disable_drag=True,
+                                ),
                 widget.Prompt(),
                 widget.WindowName(),
                 widget.Systray(),
                 # right side
                 widget.TextBox(text=" | "),
-                widget.Net(format="Net:{up}↑↓{down}", interface='enp34s0'),
-                widget.Memory(format="RAM:{MemUsed: .0f}{mm}/{MemTotal: .0f}{mm}"),
-                # widget.NvidiaSensors(format='GPU: {temp}°C fan:{fan_speed}'),
-                widget.CPU(),
+                widget.WidgetBox(
+                    widgets=[
+                        widget.Net(format="Net:{up}↑↓{down}", interface='enp34s0'),
+                        widget.Memory(format="RAM:{MemUsed: .0f}{mm}/{MemTotal: .0f}{mm}"),
+                        # widget.NvidiaSensors(format='GPU: {temp}°C fan:{fan_speed}'),
+                        widget.CPU(),
+                    ]
+                                 ),
                 widget.TextBox(text=" | "),
                 widget.Volume(cardid=0, channel='Master', fmt='vol: {}',
                               mouse_callbacks={
                                   'Button3': lambda: qtile.cmd_spawn(terminal + ' -e alsamixer'),
                               }),
                 widget.TextBox(text=" | "),
-                widget.CheckUpdates(distro="Arch",
-                                    no_update_string='0 updates', 
-                                    display_format="{updates} updates",
-                                    mouse_callbacks={
-                                        'Button1': lambda: qtile.cmd_spawn(terminal + ' -e sudo pacman -Suy'),
-                                        'Button3': lambda: qtile.cmd_spawn(terminal + ' -e sudo pacman -Suy'),
-                                    }),
                 widget.Clock(format="%A, %Y-%m-%d %H:%M UTF",
                              mouse_callbacks={
                                  'Button1': lambda: qtile.cmd_spawn(terminal + ' -e calcurse'),
-                                 'Button3': lambda: qtile.cmd_spawn(terminal + ' -e shutdowntui'),
+                                 'Button3': lambda: qtile.cmd_spawn(terminal + ' -e shutdown'),
                              }),
                 widget.Sep(foreground=bar_bg, linewidth=2)
     ]
@@ -197,7 +202,7 @@ dgroups_app_rules = []  # type: list
 follow_mouse_focus = True
 bring_front_click = False
 cursor_warp = False
-floating_layout = layout.Floating(
+floating_layout = layout.Floating(border_focus = border_focus,
     float_rules=[
         # Run the utility of `xprop` to see the wm class and name of an X client.
         *layout.Floating.default_float_rules,

@@ -11,10 +11,6 @@ call plug#begin()
   Plug 'preservim/nerdcommenter'
   Plug 'godlygeek/tabular'
 
-  " better statusline
-  Plug 'vim-airline/vim-airline'
-  Plug 'vim-airline/vim-airline-themes'
-
   " lsp ans asyncomplete
   Plug 'prabirshrestha/vim-lsp'
   Plug 'mattn/vim-lsp-settings'
@@ -42,16 +38,7 @@ nmap <leader>w :w<CR>
 nmap <leader>x :x<CR>
 nmap <leader>q :q<CR>
 
-" colors
-let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 syntax enable                " enable syntax processing
-set background=dark
-
-" vim-airline config
-let g:airline_theme='bubblegum'
-let g:airline_powerline_fonts = 1
-"let g:airline#extensions#tabline#enabled = 1
-"let g:airline#extensions#tabline#buffer_nr_show = 1
 
 " spaces and tabs
 set tabstop=2

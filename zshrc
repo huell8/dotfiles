@@ -3,7 +3,7 @@
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.config/oh-my-zsh"
 
-export PATH=$PATH:$HOME/scripts
+export PATH=$PATH:$HOME/.bin
 export PATH=$PATH:$HOME/.emacs.d/bin # doom emacs scripts
 export PATH=$PATH:$HOME/.cargo/bin # default location of cargo compiled binaries
 export PATH=$PATH:$HOME/.local/bin # default location of pip3 installed binaries
@@ -92,19 +92,15 @@ alias -g NUL=">/dev/null 2>&1"
 		read RESPONSE
 
 		case "$RESPONSE" in
-			s)        EXE="shutdown --poweroff now";;
-			shutdown) EXE="shutdown --poweroff now";;
-			r)        EXE="shutdown --reboot now";;
-			reboot)   EXE="shutdown --reboot now";;
-			h)        EXE="shutdown --halt now";;
-			halt)     EXE="shutdown --halt now";;
+			s)        EXE="sudo shutdown --poweroff now";;
+			shutdown) EXE="sudo shutdown --poweroff now";;
+			r)        EXE="sudo shutdown --reboot now";;
+			reboot)   EXE="sudo shutdown --reboot now";;
+			h)        EXE="sudo shutdown --halt now";;
+			halt)     EXE="sudo shutdown --halt now";;
 			*)        exit 0;;
 		esac
 
-		read -p 'sure? Y/n: ' CONFIRM
-		CONFIRM=$(echo "$CONFIRM" | tr '[:upper:]' '[:lower:]')
-		if [[ $CONFIRM == "" ]] || [[ $CONFIRM == "y" ]] || [[ $CONFIRM == "yes" ]]; then
-			$EXE
-		fi
+		sh -c "$EXE"
 	}
 # }
