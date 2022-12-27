@@ -43,7 +43,8 @@ keys = [
     Key([mod, "control"], "l", lazy.layout.grow_right(), desc="Grow window to the right"),
     Key([mod, "control"], "j", lazy.layout.grow_down(), desc="Grow window down"),
     Key([mod, "control"], "k", lazy.layout.grow_up(), desc="Grow window up"),
-    Key([mod], "n", lazy.layout.normalize(), desc="Reset all window sizes"), 
+    Key([mod], "n", lazy.layout.normalize(), desc="Reset all window sizes"),
+    Key([mod], "t", lazy.window.toggle_floating(), desc="Toggle floating"),
     ### for a multi-monitor setup
     Key([mod], "period", lazy.next_screen(), desc='Move focus to next monitor'),
     Key([mod], "comma", lazy.prev_screen(), desc='Move focus to prev monitor'),
@@ -59,11 +60,11 @@ keys = [
         selected_background=bar_bg,
         selected_foreground=dmenu_color,
         dmenu_bottom=True,
-        font='sans',
+        font='SFMono Nerd Font Mono',
         fontsize=12,
     ))),
     # screenshots
-    Key([mod], "u", lazy.spawn('escrotum --select --clipboard'), desc="screenshot to clipboard"),
+    Key([mod], "u", lazy.spawn('escrotum --select --clipboard'), desc="Screenshot to clipboard"),
     Key([mod, "shift"], "u", lazy.spawn('escrotum --select ~/Downloads/screenshot.png'), desc="screenshot to ~/Downloads"),
     # spawn shortcuts 
     Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
@@ -114,7 +115,7 @@ layouts = [
 
 # widgets
 widget_defaults = dict(
-    font="sans",
+    font="SFMono Nerd Font Mono",
     fontsize=12,
     padding=3,
     background=bar_bg
@@ -133,7 +134,7 @@ def init_widgets_list0():
                 widget.WindowName(),
                 widget.Systray(),
                 # right side
-                widget.TextBox(text=" | "),
+                widget.TextBox(text="|"),
                 widget.WidgetBox(
                     widgets=[
                         widget.Net(format="Net:{up}↑↓{down}", interface='enp34s0'),
@@ -142,12 +143,12 @@ def init_widgets_list0():
                         widget.CPU(),
                     ]
                                  ),
-                widget.TextBox(text=" | "),
+                widget.TextBox(text="|"),
                 widget.Volume(cardid=0, channel='Master', fmt='vol: {}',
                               mouse_callbacks={
                                   'Button3': lambda: qtile.cmd_spawn(terminal + ' -e alsamixer'),
                               }),
-                widget.TextBox(text=" | "),
+                widget.TextBox(text="|"),
                 widget.Clock(format="%A, %Y-%m-%d %H:%M UTF",
                              mouse_callbacks={
                                  'Button1': lambda: qtile.cmd_spawn(terminal + ' -e calcurse'),
@@ -161,14 +162,16 @@ def init_widgets_list1():
     widgets_list = [
                 # left side
                 widget.CurrentLayout(),
-                widget.GroupBox(),
-                widget.Prompt(),
+                widget.GroupBox(
+                    highlight_method='line',
+                    disable_drag=True,
+                                ),
+               widget.Prompt(),
                 widget.WindowName(),
                 # right side
                  widget.Clock(format="%A, %Y-%m-%d %H:%M UTF",
                              mouse_callbacks={
                                  'Button1': lambda: qtile.cmd_spawn(terminal + ' -e calcurse'),
-                                 'Button3': lambda: qtile.cmd_spawn(terminal + ' -e shutdowntui'),
                              }),
                 widget.TextBox(text=" ")
     ]
@@ -187,14 +190,6 @@ screens = [
             24,
         ),
     ),
-]
-
-
-# Drag floating layouts.
-mouse = [
-    Drag([mod], "Button1", lazy.window.set_position_floating(), start=lazy.window.get_position()),
-    Drag([mod], "Button3", lazy.window.set_size_floating(), start=lazy.window.get_size()),
-    Click([mod], "Button2", lazy.window.bring_to_front()),
 ]
 
 dgroups_key_binder = None
