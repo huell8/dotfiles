@@ -17,6 +17,7 @@ def autostart():
 mod = "mod4"
 terminal = "alacritty"
 browser = "firefox"
+task_manager = "alacritty -e htop"
 
 # colors
 bar_bg          = "#282c34" 
@@ -61,7 +62,7 @@ keys = [
         selected_foreground=dmenu_color,
         dmenu_bottom=True,
         font='SFMono Nerd Font Mono',
-        fontsize=12,
+        fontsize=10,
     ))),
     # screenshots
     Key([mod], "u", lazy.spawn('escrotum --select --clipboard'), desc="Screenshot to clipboard"),
@@ -136,11 +137,28 @@ def init_widgets_list0():
                 # right side
                 widget.TextBox(text="|"),
                 widget.WidgetBox(
+                    text_open   = '[>]',
+                    text_closed = '[<]',
+                    close_button_location='right',
+                    mouse_callbacks={
+                        'Button3': lambda: qtile.cmd_spawn(task_manager),
+                    },
                     widgets=[
-                        widget.Net(format="Net:{up}↑↓{down}", interface='enp34s0'),
-                        widget.Memory(format="RAM:{MemUsed: .0f}{mm}/{MemTotal: .0f}{mm}"),
+                        widget.Net(format="up:{up} down:{down}", interface='enp34s0', mouse_callbacks={
+                                    'Button1': lambda: qtile.cmd_spawn(task_manager),
+                                    'Button3': lambda: qtile.cmd_spawn(task_manager),
+                                   }),
+                        widget.TextBox(text=";"),
+                        widget.Memory(format="RAM: {MemUsed:.0f}{mm}/{MemTotal:.0f}{mm}", mouse_callbacks={
+                                    'Button1': lambda: qtile.cmd_spawn(task_manager),
+                                    'Button3': lambda: qtile.cmd_spawn(task_manager),
+                                   }),
+                        widget.TextBox(text=";"),
                         # widget.NvidiaSensors(format='GPU: {temp}°C fan:{fan_speed}'),
-                        widget.CPU(),
+                        widget.CPU(format="CPU: {freq_current}GHz {load_percent}% ", max_chars=16, mouse_callbacks={
+                                    'Button1': lambda: qtile.cmd_spawn(task_manager),
+                                    'Button3': lambda: qtile.cmd_spawn(task_manager),
+                                   }),
                     ]
                                  ),
                 widget.TextBox(text="|"),
@@ -149,12 +167,12 @@ def init_widgets_list0():
                                   'Button3': lambda: qtile.cmd_spawn(terminal + ' -e alsamixer'),
                               }),
                 widget.TextBox(text="|"),
-                widget.Clock(format="%A, %Y-%m-%d %H:%M UTF",
+                widget.Clock(format="%A, %Y-%m-%d %H:%M UTC",
                              mouse_callbacks={
                                  'Button1': lambda: qtile.cmd_spawn(terminal + ' -e calcurse'),
                                  'Button3': lambda: qtile.cmd_spawn(terminal + ' -e shutdown'),
                              }),
-                widget.Sep(foreground=bar_bg, linewidth=2)
+                widget.Sep(foreground=bar_bg, linewidth=2),
     ]
     return widgets_list
 
@@ -166,15 +184,16 @@ def init_widgets_list1():
                     highlight_method='line',
                     disable_drag=True,
                                 ),
-               widget.Prompt(),
+                widget.Prompt(),
                 widget.WindowName(),
                 # right side
-                 widget.Clock(format="%A, %Y-%m-%d %H:%M UTF",
+                widget.Clock(format="%A, %Y-%m-%d %H:%M UTC",
                              mouse_callbacks={
                                  'Button1': lambda: qtile.cmd_spawn(terminal + ' -e calcurse'),
+                                 'Button3': lambda: qtile.cmd_spawn(terminal + ' -e shutdown'),
                              }),
-                widget.TextBox(text=" ")
-    ]
+                widget.Sep(foreground=bar_bg, linewidth=2),
+                    ]
     return widgets_list
 
 screens = [
