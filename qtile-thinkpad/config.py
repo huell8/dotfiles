@@ -1,6 +1,6 @@
 from libqtile import qtile
 from libqtile import bar, layout, widget, extension, hook
-from libqtile.config import Click, Drag, Group, Key, Match, Screen, ScratchPad, DropDown
+from libqtile.config import Click, Drag, Group, Key, KeyChord, Match, Screen, ScratchPad, DropDown
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
 from libqtile.widget import base
@@ -54,16 +54,8 @@ keys = [
     Key([mod], "w", lazy.window.kill(), desc="Kill focused window"),
     Key([mod, "control"], "r", lazy.reload_config(), desc="Reload the config"),
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
-    # dmenu
-    Key([mod], "space", lazy.run_extension(extension.DmenuRun(
-        background=bar_bg,
-        foreground='#ffffff',
-        selected_background=bar_bg,
-        selected_foreground=dmenu_color,
-        dmenu_bottom=True,
-        font='SFMono Nerd Font Mono',
-        fontsize=10,
-    ))),
+    # rofi
+    Key([mod], "space", lazy.spawn('rofi -show drun'), desc="spawn drun"),
     # screenshots
     Key([mod], "u", lazy.spawn('escrotum --select --clipboard'), desc="Screenshot to clipboard"),
     Key([mod, "shift"], "u", lazy.spawn('escrotum --select ~/Downloads/screenshot.png'), desc="screenshot to ~/Downloads"),
@@ -163,12 +155,17 @@ def init_widgets_list0():
                 widget.TextBox(text="|"),
                 widget.Battery(),
                 widget.TextBox(text="|"),
+                widget.Backlight(
+                    backlight_name='intel_backlight',
+                    fmt='lux: {}',
+                ),
+                widget.TextBox(text="|"),
                 widget.Volume(cardid=0, channel='Master', fmt='vol: {}',
                               mouse_callbacks={
                                   'Button3': lambda: qtile.cmd_spawn(terminal + ' -e alsamixer'),
                               }),
                 widget.TextBox(text="|"),
-                widget.Clock(format="%A, %Y-%m-%d %H:%M UTC",
+                widget.Clock(format="%Y-%m-%d, %H:%M UTC",
                              mouse_callbacks={
                                  'Button1': lambda: qtile.cmd_spawn(terminal + ' -e calcurse'),
                                  'Button3': lambda: qtile.cmd_spawn(terminal + ' -e shutdown'),
