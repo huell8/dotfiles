@@ -54,17 +54,28 @@ keys = [
     Key([mod], "w", lazy.window.kill(), desc="Kill focused window"),
     Key([mod, "control"], "r", lazy.reload_config(), desc="Reload the config"),
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
-    # rofi
+    # rofi drun
     Key([mod], "space", lazy.spawn('rofi -show drun'), desc="spawn drun"),
     # screenshots
-    Key([mod], "u", lazy.spawn('escrotum --select --clipboard'), desc="Screenshot to clipboard"),
-    Key([mod, "shift"], "u", lazy.spawn('escrotum --select ~/Downloads/screenshot.png'), desc="screenshot to ~/Downloads"),
-    # spawn shortcuts 
-    Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
+    Key([mod], "u", lazy.spawn('escrotum --select --clipboard'), desc="Screenshot selection to clipboard"),
+    Key([mod, "shift"], "u", lazy.spawn('escrotum --select ~/Downloads/screenshot.png'), desc="Screenshot selection to ~/Downloads"),
+    Key([mod], "i", lazy.spawn('escrotum --clipboard'), desc="Screenshot whole screen to clipboard"),
+    Key([mod, "shift"], "i", lazy.spawn('escrotum ~/Downloads/screenshot.png'), desc="Screenshot whole screen to ~/Downloads"),
+    # spawn shortcuts:
+    #  - terminal emulator:
     Key([mod, "shift"], "Return", lazy.spawn(terminal), desc="Launch terminal"),
     Key([mod], "Return", lazy.group['scratchpad'].dropdown_toggle('term'), desc="Scrachpad terminal"),
-    Key([mod], "b", lazy.spawn(browser), desc="Launch browser"),
-    Key([mod], "e", lazy.spawn("emacsclient -c -a 'emacs'"), desc="Launch emacs"),
+    #  - launch keychords (mod+o + shortcut):
+    KeyChord([mod], "o", [
+        Key([], "b", lazy.spawn(browser), desc="Launch browser"),
+        Key([], "e", lazy.spawn("emacsclient -c -a 'emacs'"), desc="Launch emacs"),
+        Key([], "k", lazy.spawn('keepassxc'), desc="Launch KeePassXC"),
+    ]),
+    Key([], "XF86AudioRaiseVolume", lazy.spawn("amixer set Master 5%+"), desc="Volume increase"),
+    Key([], "XF86AudioLowerVolume", lazy.spawn("amixer set Master 5%-"), desc="Volume decrease"),
+    Key([], "XF86AudioMute", lazy.spawn("amixer set Master 0%"), desc="Volume mute"),
+    Key([], "XF86MonBrightnessUp", lazy.spawn("brightnessctl set 5%+"), desc="Increase monitor birghtness"),
+    Key([], "XF86MonBrightnessDown", lazy.spawn("brightnessctl set 5%-"), desc="Decrease monitor brightess"),
 ]
 
 # groups
@@ -136,11 +147,6 @@ def init_widgets_list0():
                         'Button3': lambda: qtile.cmd_spawn(task_manager),
                     },
                     widgets=[
-                        widget.Net(format="up:{up} down:{down}", interface='enp34s0', mouse_callbacks={
-                                    'Button1': lambda: qtile.cmd_spawn(task_manager),
-                                    'Button3': lambda: qtile.cmd_spawn(task_manager),
-                                   }),
-                        widget.TextBox(text=";"),
                         widget.Memory(format="RAM: {MemUsed:.0f}{mm}/{MemTotal:.0f}{mm}", mouse_callbacks={
                                     'Button1': lambda: qtile.cmd_spawn(task_manager),
                                     'Button3': lambda: qtile.cmd_spawn(task_manager),
@@ -168,7 +174,7 @@ def init_widgets_list0():
                 widget.Clock(format="%Y-%m-%d, %H:%M UTC",
                              mouse_callbacks={
                                  'Button1': lambda: qtile.cmd_spawn(terminal + ' -e calcurse'),
-                                 'Button3': lambda: qtile.cmd_spawn(terminal + ' -e shutdown'),
+                                 'Button3': lambda: qtile.cmd_spawn(terminal + ' -e shutdowntui'),
                              }),
                 widget.Sep(foreground=bar_bg, linewidth=2),
     ]
