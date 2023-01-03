@@ -48,19 +48,20 @@ alias ll="ls -lAbhFqv --group-directories-first"
 alias ss="escrotum --select --clipboard"
 alias ssf="escrotum --select /home/huell/Downloads/screenshot.png"
 alias celar="clear"
+alias shutdown="shutdowntui"
+alias poweroff="shutdowntui"
+alias reboot="shutdowntui"
+alias halt="shutdowntui"
 alias cealr="clear"
 alias rm="rm -i"
 alias mv="mv -i"
 alias cp="cp -i"
-# pacman
-alias p="sudo pacman"
-alias P="yes | sudo pacman"
-alias Suy="yes | sudo pacman -Suy"
 # global
+alias -g cyank="xclip -in -selection clipboard"   # cyank  - clipboard yank
+alias -g cpaste="xclip -out -selection clipboard" # cpaste - clipboard paste
 alias -g LL="2>&1 | less"
 alias -g NE="2>/dev/null"
 alias -g NUL=">/dev/null 2>&1"
-
 
 # scripts {
 	# riced ls
@@ -81,26 +82,5 @@ alias -g NUL=">/dev/null 2>&1"
 			QUERY="$QUERY$i"
 		done
 		python3 -c "from math import *; print($QUERY)"
-	}
-	# nice tui for shutdown, reboot and halt
-	alias shutdown="shutdowntui"
-	alias poweroff="shutdowntui"
-	alias reboot="shutdowntui"
-	alias halt="shutdowntui"
-	function shutdowntui() {
-		echo "(s)hutdown, (r)eboot or (h)alt? (q)uit"
-		read RESPONSE
-
-		case "$RESPONSE" in
-			s)        EXE="sudo shutdown --poweroff now";;
-			shutdown) EXE="sudo shutdown --poweroff now";;
-			r)        EXE="sudo shutdown --reboot now";;
-			reboot)   EXE="sudo shutdown --reboot now";;
-			h)        EXE="sudo shutdown --halt now";;
-			halt)     EXE="sudo shutdown --halt now";;
-			*)        exit 0;;
-		esac
-
-		sh -c "$EXE"
 	}
 # }
