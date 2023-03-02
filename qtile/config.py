@@ -1,6 +1,6 @@
 from libqtile import qtile
 from libqtile import bar, layout, widget, extension, hook
-from libqtile.config import Click, Drag, Group, Key, Match, Screen, ScratchPad, DropDown
+from libqtile.config import Click, Drag, Group, Key, KeyChord, Match, Screen, ScratchPad, DropDown
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
 from libqtile.widget import base
@@ -14,10 +14,11 @@ def autostart():
     home = os.path.expanduser('~/.config/qtile/autostart.sh')
     subprocess.Popen([home])
 
-mod = "mod4"
+mod = "mod1"
 terminal = "alacritty"
 browser = "firefox"
 task_manager = "alacritty -e htop"
+calendar="alacritty -e calcurse"
 
 # colors
 bar_bg          = "#282c34" 
@@ -54,25 +55,26 @@ keys = [
     Key([mod], "w", lazy.window.kill(), desc="Kill focused window"),
     Key([mod, "control"], "r", lazy.reload_config(), desc="Reload the config"),
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
-    # dmenu
-    Key([mod], "space", lazy.run_extension(extension.DmenuRun(
-        background=bar_bg,
-        foreground='#ffffff',
-        selected_background=bar_bg,
-        selected_foreground=dmenu_color,
-        dmenu_bottom=True,
-        font='SFMono Nerd Font Mono',
-        fontsize=10,
-    ))),
+    # rofi drun
+    Key([mod], "space", lazy.spawn('rofi -show drun'), desc="spawn drun"),
     # screenshots
-    Key([mod], "u", lazy.spawn('escrotum --select --clipboard'), desc="Screenshot to clipboard"),
-    Key([mod, "shift"], "u", lazy.spawn('escrotum --select ~/Downloads/screenshot.png'), desc="screenshot to ~/Downloads"),
-    # spawn shortcuts 
-    Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
+    Key([mod], "u", lazy.spawn('escrotum --select --clipboard'), desc="Screenshot selection to clipboard"),
+    Key([mod, "shift"], "u", lazy.spawn('escrotum --select ~/Downloads/screenshot.png'), desc="Screenshot selection to ~/Downloads"),
+    Key([mod], "i", lazy.spawn('escrotum --clipboard'), desc="Screenshot whole screen to clipboard"),
+    Key([mod, "shift"], "i", lazy.spawn('escrotum ~/Downloads/screenshot.png'), desc="Screenshot whole screen to ~/Downloads"),
+    # spawn shortcuts:
+    #  - terminal emulator:
     Key([mod, "shift"], "Return", lazy.spawn(terminal), desc="Launch terminal"),
     Key([mod], "Return", lazy.group['scratchpad'].dropdown_toggle('term'), desc="Scrachpad terminal"),
-    Key([mod], "b", lazy.spawn(browser), desc="Launch browser"),
-    Key([mod], "e", lazy.spawn("emacsclient -c -a 'emacs'"), desc="Launch emacs"),
+    #  - Launch Keychords (Mod+o + shortcut):
+    KeyChord([mod], "o", [
+        Key([], "b", lazy.spawn(browser), desc="Launch browser"),
+        Key([], "e", lazy.spawn("emacsclient -c -a 'emacs'"), desc="Launch emacs"),
+        Key([], "k", lazy.spawn('keepassxc'), desc="Launch KeePassXC"),
+        Key([], "c", lazy.group['scratchpad'].dropdown_toggle('calendar'), desc="Scrachpad terminal"),
+    ]),
+    Key([], "XF86MonBrightnessUp", lazy.spawn("brightnessctl set 5%+"), desc="Increase monitor birghtness"),
+    Key([], "XF86MonBrightnessDown", lazy.spawn("brightnessctl set 5%-"), desc="Decrease monitor brightess"),
 ]
 
 # groups
@@ -144,17 +146,11 @@ def init_widgets_list0():
                         'Button3': lambda: qtile.cmd_spawn(task_manager),
                     },
                     widgets=[
-                        widget.Net(format="up:{up} down:{down}", interface='enp34s0', mouse_callbacks={
-                                    'Button1': lambda: qtile.cmd_spawn(task_manager),
-                                    'Button3': lambda: qtile.cmd_spawn(task_manager),
-                                   }),
-                        widget.TextBox(text=";"),
                         widget.Memory(format="RAM: {MemUsed:.0f}{mm}/{MemTotal:.0f}{mm}", mouse_callbacks={
                                     'Button1': lambda: qtile.cmd_spawn(task_manager),
                                     'Button3': lambda: qtile.cmd_spawn(task_manager),
                                    }),
                         widget.TextBox(text=";"),
-                        # widget.NvidiaSensors(format='GPU: {temp}°C fan:{fan_speed}'),
                         widget.CPU(format="CPU: {freq_current}GHz {load_percent}% ", max_chars=16, mouse_callbacks={
                                     'Button1': lambda: qtile.cmd_spawn(task_manager),
                                     'Button3': lambda: qtile.cmd_spawn(task_manager),
@@ -162,50 +158,30 @@ def init_widgets_list0():
                     ]
                                  ),
                 widget.TextBox(text="|"),
+                widget.Battery(battery=1),
+                widget.TextBox(text="|"),
+                widget.Backlight(
+                    backlight_name='intel_backlight',
+                    fmt='lux: {}',
+                ),
+                widget.TextBox(text="|"),
                 widget.Volume(cardid=0, channel='Master', fmt='vol: {}',
                               mouse_callbacks={
                                   'Button3': lambda: qtile.cmd_spawn(terminal + ' -e alsamixer'),
                               }),
                 widget.TextBox(text="|"),
-                widget.Clock(format="%A, %Y-%m-%d %H:%M UTC",
+                widget.Clock(format="%Y-%m-%d, %H:%M UTC",
                              mouse_callbacks={
-                                 'Button1': lambda: qtile.cmd_spawn(terminal + ' -e calcurse'),
-                                 'Button3': lambda: qtile.cmd_spawn(terminal + ' -e shutdown'),
+                                 'Button1': lambda: lazy.group['scratchpad'].dropdown_toggle('calendar'),
                              }),
                 widget.Sep(foreground=bar_bg, linewidth=2),
     ]
-    return widgets_list
-
-def init_widgets_list1():
-    widgets_list = [
-                # left side
-                widget.CurrentLayout(),
-                widget.GroupBox(
-                    highlight_method='line',
-                    disable_drag=True,
-                                ),
-                widget.Prompt(),
-                widget.WindowName(),
-                # right side
-                widget.Clock(format="%A, %Y-%m-%d %H:%M UTC",
-                             mouse_callbacks={
-                                 'Button1': lambda: qtile.cmd_spawn(terminal + ' -e calcurse'),
-                                 'Button3': lambda: qtile.cmd_spawn(terminal + ' -e shutdown'),
-                             }),
-                widget.Sep(foreground=bar_bg, linewidth=2),
-                    ]
     return widgets_list
 
 screens = [
     Screen(
         bottom=bar.Bar(
             init_widgets_list0(),
-            24,
-        ),
-    ),
-    Screen(
-        bottom=bar.Bar(
-            init_widgets_list1(),
             24,
         ),
     ),
@@ -234,7 +210,7 @@ reconfigure_screens = True
 
 # If things like steam games want to auto-minimize themselves when losing
 # focus, should we respect this or not?
-auto_minimize = True
+auto_minimize = False
 
 # When using the Wayland backend, this can be used to configure input devices.
 wl_input_rules = None
